@@ -29,9 +29,11 @@ return new class extends Migration
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('phone')->nullable();
             $table->string('avatar')->nullable();
+            $table->string('role', 20)->default('agent');
             $table->string('status', 20)->default('active'); // active, inactive, suspended
             $table->softDeletes();
 
+            $table->index(['tenant_id', 'role']);
             $table->index(['tenant_id', 'status']);
         });
     }

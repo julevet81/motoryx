@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -56,5 +57,7 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Database\Eloquent\Model::preventSilentlyDiscardingAttributes(
             ! $this->app->environment('production')
         );
+
+        Schema::defaultStringLength(191);
     }
 }

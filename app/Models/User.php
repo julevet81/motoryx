@@ -13,11 +13,12 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'tenant_id', 'branch_id', 'first_name', 'last_name',
         'email', 'phone', 'password', 'avatar', 'role', 'status',
+        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -26,7 +27,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password'          => 'hashed',
+        'password' => 'hashed',
     ];
 
     // -------------------------------------------------------

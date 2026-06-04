@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Traits\ApiResponser;
@@ -12,7 +11,6 @@ use App\Traits\LogsActivity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -24,8 +22,7 @@ class AuthController extends Controller
     public function login(LoginRequest $request): JsonResponse
     {
         /** @var Tenant $tenant */
-        // Use bound tenant if available, otherwise fall back to the first tenant record
-        $tenant = app()->bound('tenant');
+        $tenant = app('tenant');
 
         $user = User::query()
             ->forTenant($tenant->id)
@@ -49,8 +46,8 @@ class AuthController extends Controller
         $this->logActivity('auth.login', $user);
 
         return $this->successResponse([
-            'user'       => $this->userResource($user),
-            'token'      => $token->plainTextToken,
+            'user' => $this->userResource($user),
+            'token' => $token->plainTextToken,
             'expires_at' => $token->accessToken->expires_at,
         ], 'Logged in successfully.');
     }
@@ -83,9 +80,9 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'first_name' => 'sometimes|string|max:100',
-            'last_name'  => 'sometimes|string|max:100',
-            'phone'      => 'sometimes|nullable|string|max:30',
-            'avatar'     => 'sometimes|nullable|image|max:2048',
+            'last_name' => 'sometimes|string|max:100',
+            'phone' => 'sometimes|nullable|string|max:30',
+            'avatar' => 'sometimes|nullable|image|max:2048',
         ]);
 
         if ($request->hasFile('avatar')) {
@@ -104,7 +101,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'current_password' => 'required|string',
-            'password'         => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         if (! Hash::check($request->current_password, $request->user()->password)) {
@@ -124,15 +121,15 @@ class AuthController extends Controller
     private function userResource(User $user): array
     {
         return [
-            'id'         => $user->id,
+            'id' => $user->id,
             'first_name' => $user->first_name,
-            'last_name'  => $user->last_name,
-            'email'      => $user->email,
-            'phone'      => $user->phone,
-            'status'     => $user->status,
-            'avatar'     => $user->avatar ? asset('storage/' . $user->avatar) : null,
-            'branch'     => $user->relationLoaded('branch') ? $user->branch?->only('id', 'name') : null,
-            'tenant_id'  => $user->tenant_id,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'status' => $user->status,
+            'avatar' => $user->avatar ? asset('storage/'.$user->avatar) : null,
+            'branch' => $user->relationLoaded('branch') ? $user->branch?->only('id', 'name') : null,
+            'tenant_id' => $user->tenant_id,
         ];
     }
 }

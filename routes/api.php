@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('v1')->middleware(['resolve.tenant', 'throttle:api'])->group(function () {
+Route::prefix('v1')->middleware(['resolve.tenant'])->group(function () {
 
     // -------------------------------------------------------
     // Public — lookup data (cached, no auth needed)

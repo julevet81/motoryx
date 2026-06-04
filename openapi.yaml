@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Motoryx API
   version: 1.0.0
-  description: OpenAPI definition for the Motoryx Laravel API. Import this file into Postman and set the server URL, X-Tenant header, and bearer token as needed.
+  description: "OpenAPI definition for the Motoryx Laravel API. Import this file into Postman and set the server URL, X-Tenant header, and bearer token as needed. For the seeded local demo tenant, use X-Tenant: autodeal."
 servers:
   - url: http://localhost:8000/api
     description: Local Laravel server
@@ -27,14 +27,24 @@ paths:
     post:
       tags: [Auth]
       summary: Login
+      description: "Login requires the X-Tenant header. In the seeded local database, use X-Tenant `autodeal` with `admin@autodeal.com` / `12345678`."
       security:
         - tenantHeader: []
+      parameters:
+        - $ref: '#/components/parameters/TenantHeader'
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LoginRequest'
+            examples:
+              seededAdmin:
+                summary: Seeded local admin
+                value:
+                  email: admin@autodeal.com
+                  password: '12345678'
+                  device_name: postman
       responses:
         '200':
           description: Logged in successfully.
@@ -55,8 +65,38 @@ paths:
                           expires_at:
                             type: string
                             format: date-time
+        '400':
+          description: Tenant header missing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Tenant not specified.
+                errors: null
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Tenant or user account is suspended.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: This account is suspended.
+                errors: null
+        '404':
+          description: Tenant slug not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: Tenant not found.
+                errors: null
         '422':
           $ref: '#/components/responses/ValidationError'
   /v1/auth/logout:
@@ -895,7 +935,16 @@ components:
       type: apiKey
       in: header
       name: X-Tenant
+      description: "Tenant slug resolved from the tenants table. Seeded local demo value: autodeal."
   parameters:
+    TenantHeader:
+      name: X-Tenant
+      in: header
+      required: true
+      description: Tenant slug. Use `autodeal` for the seeded local demo tenant.
+      schema:
+        type: string
+        example: autodeal
     Id:
       name: id
       in: path
